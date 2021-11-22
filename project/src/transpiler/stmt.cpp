@@ -215,6 +215,7 @@ StmtGen* getDoWhileStmtGenerator(const DoStmt* pStmt) {
     auto cond = getStmtGen(pStmt->getCond());
     gen->Add(cond);
     auto* objStmtGen = new ObjectStmtGen;
+    objStmtGen->params.push_back("i");
     auto body = getStmtGen(pStmt->getBody());
     auto* bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
     if (!bodyCmp) {
@@ -232,6 +233,7 @@ StmtGen* getWhileStmtGenerator(const WhileStmt* pStmt) {
     auto cond = getStmtGen(pStmt->getCond());
     gen->Add(cond);
     ObjectStmtGen* objStmtGen = new ObjectStmtGen;
+    objStmtGen->params.push_back("i");
     auto body = getStmtGen(pStmt->getBody());
     CompoundStmtGen* bodyCmp = llvm::dyn_cast<CompoundStmtGen>(body);
     if (!bodyCmp) {

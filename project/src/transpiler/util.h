@@ -10,6 +10,9 @@
 // Запись строки символов в указанный файл
 void str2file(std::string str, std::string fileName);
 
+// Генерации строки из вектора строк через разделитель.
+std::string strjoin(std::vector<std::string> vec,std::string sep = " ")
+
 // Чтение из файла в вектор строк
 void file2vector(std::string fileName, std::vector<std::string> &text);
 

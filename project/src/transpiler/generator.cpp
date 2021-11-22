@@ -3,6 +3,7 @@
 #include "llvm/Support/Casting.h"
 
 #include "generator.h"
+#include "util.h"
 
 
 // void VarGen::GenValue(std::string &str) {
@@ -245,10 +246,9 @@ void LiteralStmtGen::Generate(std::ostream &out) {
     out << ")";
 }
 
-//TODO универсвализировать, добавить параметры возможно наследовать от compgen
 void ObjectStmtGen::Generate(std::ostream &out) {
     //out << getIndentSpaces();
-    out << "[i]\n";
+    out << "[" << strjoin(params)<< "]\n";
     AbstractGen::shift++;
     body->Generate(out);
     AbstractGen::shift--;

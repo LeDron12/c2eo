@@ -342,6 +342,7 @@ struct DoWhileStmtGen: MultiLineStmtGen {
 
 struct ObjectStmtGen: StmtGen {
 
+    std::vector<std::string> params;
     StmtGen* body;
     // Добавление очередного объекта к глобальному пространству
     void Generate(std::ostream &out) override;

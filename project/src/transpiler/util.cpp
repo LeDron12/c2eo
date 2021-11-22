@@ -23,6 +23,17 @@ void file2vector(std::string fileName, std::vector<std::string> &text) {
     }
 }
 
+// Генерации строки из вектора строк через разделитель.
+std::string strjoin(std::vector<std::string> vec,std::string sep = " ") {
+    if(vec.empty())
+        return "";
+    std::string res = vec[0];
+    for (int i = 1; i < vec.size(); ++i) {
+        res += vec[i];
+    }
+    return res;
+}
+
 // Формирование строк для файла с глобальными объектами
 // Пока формируется только для одной единицы компиляции
 // В дальнейшем нужно будет собирать множество разных файлов с одинаковыми расширениями.
