@@ -26,7 +26,13 @@ SourceGen::~SourceGen() {
 
 //--------------------------------------------------------------------------------------------------
 void VarGen::Generate(std::ostream &out) {
-    out << type << " " << value << " > " << name;
+    out << type;
+    if(nestedStmt)
+    {
+        out << " ";
+        nestedStmt->Generate(out);
+    }
+    out <<" > " << name;
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -40,7 +46,7 @@ std::string StmtGen::getIndentSpaces() {
 void MultiLineStmtGen::Add(StmtGen* stmt) {
     UnaryStmtGen* st = llvm::dyn_cast<UnaryStmtGen>(stmt);
     //TODO Вынести Empty как отдельный тип или метод
-    if (st && st->op == "" && st->value == "" && st->nestedStmt == nullptr)
+    if (st && st->postfix == "" && st->value == "" && st->nestedStmt == nullptr)
         return;
     statements.push_back(stmt);
 }

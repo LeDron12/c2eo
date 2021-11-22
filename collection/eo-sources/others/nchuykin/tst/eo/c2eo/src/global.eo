@@ -1,0 +1,28 @@
++package c2eo.src
++alias stdout org.eolang.io.stdout
++alias sprintf org.eolang.txt.sprintf
+
++alias c2eo.ctypes.c_bool
++alias c2eo.ctypes.c_char
++alias c2eo.ctypes.c_float64
++alias c2eo.ctypes.c_int16
++alias c2eo.ctypes.c_int32
++alias c2eo.ctypes.c_int64
+
+[arg] > global
+  c_int32 2 > g_a
+  c_float64 3.000000 > g_pi
+  c_float64 0.0 > g_r1
+  c_float64 0.0 > g_r2
+  [arg] > main
+    seq > @
+      ^.g_r1.write (^.g_a.mul (^.g_pi))
+      ^.g_r2.write (^.g_pi.mul (^.g_a))
+      seq
+        stdout (^.g_r1.as-string)
+        stdout "\n"
+      seq
+        stdout (^.g_r2.as-string)
+        stdout "\n"
+  main arg > @
+

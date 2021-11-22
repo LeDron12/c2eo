@@ -61,13 +61,15 @@ struct AbstractGen {
 };
 
 
+class StmtGen;
+
 //-------------------------------------------------------------------------------------------------
 // Генератор кода для объявления переменных.
 // Накапливает необходимые значения в соответствующих строках.
 struct VarGen: AbstractGen {
     std::string name;       // идентификатор переменной
     std::string type;       // тип переменной
-    std::string value;      // значение переменной
+    StmtGen* nestedStmt;      // значение переменной
     void Generate(std::ostream &out) override;
 
     VarGen(): AbstractGen(GenKind::GK_VarGen) {}
@@ -203,11 +205,14 @@ struct BinaryStmtGen: StmtGen {
 // Накапливает необходимые значения в соответствующих строках.
 struct UnaryStmtGen: StmtGen {
     StmtGen* nestedStmt = nullptr;
-    std::string op;
 
     virtual void Generate(std::ostream &out);
 
     UnaryStmtGen() : StmtGen(GenKind::GK_UnaryStmtGen){}
+    explicit UnaryStmtGen(std::string value, StmtGen* nestedStmt = nullptr) : StmtGen(GenKind::GK_UnaryStmtGen){
+        this->value = value;
+        this->nestedStmt = nestedStmt;
+    }
 
     static bool classof(const AbstractGen *S) {
         return S->getKind() >= GK_UnaryStmtGen &&
