@@ -517,54 +517,43 @@ EOObject GetCharacterLiteralEOObject(const clang::CharacterLiteral *p_literal) {
 }
 
 EOObject GetInitListEOObject(const clang::InitListExpr *list) {
-  //  list->dump();
   EOObject eoList{"*", EOObjectType::EO_EMPTY};
   clang::QualType qualType = list->getType().getDesugaredType(*context);
   std::vector<EOObject> inits;
   std::string elementTypeName;
   std::vector<std::tuple<std::string, clang::QualType, size_t>>::iterator
       recElement;
-  std::vector<size_t> dims_size;
-  size_t elements_size = 0;
-//  size_t elementSize = 0, type_size = 0;
+  size_t elementSize = 0, depth = 1;
+  bool finished = false;
   if (qualType->isArrayType()) {
     const auto *arr = llvm::dyn_cast<clang::ConstantArrayType>(qualType);
     clang::QualType elementQualType = arr->getElementType();
-    dims_size.emplace_back(1);
-    dims_size[dims_size.size() - 1] *= arr->getSize().getLimitedValue();
+    elementSize = 1;
     if (elementQualType->isPointerType()) {
-      dims_size[dims_size.size() - 1] *= 8;
+      elementSize *= 8;
     } else if (elementQualType->isBuiltinType()) {
-      dims_size[dims_size.size() - 1] *= context->getTypeInfo(elementQualType).Width / byte_size / dims_size[dims_size.size() - 1];
+      elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
     } else {
-      dims_size[dims_size.size() - 1] *= context->getTypeInfo(elementQualType).Align / byte_size;
+      elementSize = context->getTypeInfo(elementQualType).Width / byte_size;
+      finished = true;
     }
-//    elementSize = 1;
-//    type_size = 1;
-    while (elementQualType->isArrayType()) {
+    while (elementQualType->isArrayType() && !finished) {
+      ++depth;
       const auto *cat =
           llvm::dyn_cast<clang::ConstantArrayType>(elementQualType);
-      dims_size[dims_size.size() - 1] *= cat->getSize().getLimitedValue();
       elementQualType =
           llvm::dyn_cast<clang::ConstantArrayType>(elementQualType)
               ->getElementType();
       if (elementQualType->isPointerType()) {
-        dims_size[dims_size.size() - 1] *= 8;
+        elementSize *= 8;
       } else if (elementQualType->isBuiltinType()) {
-        dims_size[dims_size.size() - 1] *= context->getTypeInfo(elementQualType).Width / byte_size / dims_size[dims_size.size() - 1];
+        elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
       } else {
-        dims_size[dims_size.size() - 1] *= context->getTypeInfo(elementQualType).Align / byte_size;
+        elementSize = context->getTypeInfo(elementQualType).Width / byte_size;
+        finished = true;
       }
     }
     elementTypeName = GetTypeName(elementQualType);
-    for (auto d : dims_size) {
-      elements_size += d;
-    }
-//    if (elementQualType->isPointerType()) {
-//      elementSize *= 8;
-//    } else {
-//      elementSize *= context->getTypeInfo(elementQualType).Align / byte_size;
-//    }
   } else if (qualType->isRecordType()) {
     auto *recordType = transpiler.record_manager_.GetById(
         qualType->getAsRecordDecl()->getID());
@@ -579,7 +568,7 @@ EOObject GetInitListEOObject(const clang::InitListExpr *list) {
     if (qualType->isArrayType()) {
       EOObject newShift{"times"};
       newShift.nested.emplace_back(to_string(i), EOObjectType::EO_LITERAL);
-      newShift.nested.emplace_back(to_string(elements_size),
+      newShift.nested.emplace_back(to_string(elementSize),
                                    EOObjectType::EO_LITERAL);
       shiftedAlias.nested.push_back(newShift);
     } else if (qualType->isRecordType()) {
@@ -887,13 +876,14 @@ EOObject GetArraySubscriptExprEOObject(const ArraySubscriptExpr *op,
       EOObject curr_shift{"times"};
       EOObject type_size_obj{std::to_string(dim_size),
                              EOObjectType::EO_LITERAL};
-//      if (!is_multidim) {
-//        if (base_ch->getStmtClass() == Stmt::ArraySubscriptExprClass) {
-//          const auto *arr = dyn_cast<ArraySubscriptExpr>(base_ch);
-//          auto di = getArrayTypeSize(arr, dims, false);
-//          type_size_obj = {std::to_string(di.first), EOObjectType::EO_LITERAL};
-//        }
-//      }
+      //      if (!is_multidim) {
+      //        if (base_ch->getStmtClass() == Stmt::ArraySubscriptExprClass) {
+      //          const auto *arr = dyn_cast<ArraySubscriptExpr>(base_ch);
+      //          auto di = getArrayTypeSize(arr, dims, false);
+      //          type_size_obj = {std::to_string(di.first),
+      //          EOObjectType::EO_LITERAL};
+      //        }
+      //      }
       curr_shift.nested.emplace_back(index_name);
       curr_shift.nested.emplace_back(type_size_obj);
 
